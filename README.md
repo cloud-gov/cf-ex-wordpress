@@ -1,8 +1,8 @@
 ## CloudFoundry PHP Example Application:  Wordpress
 
-This is an example application which can be run on CloudFoundry using the [PHP Build Pack].
+This is an example application which can be run on CloudFoundry using the [PHP Build Pack].  This branch contains instructions for pushing to Pivotal CloudFoundry which uses the Pivotal MySQL & Pivotal SSHFS services.
 
-This is an out-of-the-box implementation of Wordpress 4.0.  It's an example of how common PHP applications can easily be run on CloudFoundry.
+This is an out-of-the-box implementation of Wordpress 4.  It's an example of how common PHP applications can easily be run on CloudFoundry.
 
 ### Usage
 
@@ -11,19 +11,41 @@ This is an out-of-the-box implementation of Wordpress 4.0.  It's an example of h
   ```bash
   git clone https://github.com/dmikusa-pivotal/cf-ex-worpress.git cf-ex-wordpress
   cd cf-ex-wordpress
+  git checkout pcf-sshfs-example
   ```
 
-1.  If you don't have one already, create a MySQL service.  With Pivotal Web Services, the following command will create a free MySQL database through [ClearDb].
+1.  If you don't have one already, create a MySQL service.  With Pivotal CF, the following command will create a MySQL instance (requires the Pivotal MySQL tile to be deployed, service plan name may differ).
 
   ```bash
-  cf create-service cleardb spark my-test-mysql-db
+  cf create-service p-mysql 250mb-dev mysql-db
   ```
 
-1. Edit the manifest.yml file.  Change the 'host' attribute to something unique.  Then under "services:" change "mysql-db" to the name of your MySQL service.  This is the name of the service that will be bound to your application and thus used by Wordpress.
+1.  If you don't have one already, create an SSHFS service.  With Pivotal CF, the following command will create a SSHFS instance (requires the Pivotal SSHFS tile to be deployed).
+
+  ```bash
+  cf create-service sshfs unlimited remote-fs
+  ```
+
+1. Edit the manifest.yml file.  Change the 'host' attribute to something unique.  Then under "services:" change "mysql-db" to the name of your MySQL service and "remote-fs" to the name of your SSHFS service.  These are the names of the services that will be bound to your application and should match the names you created in the previous two steps.
 
 1. Like every normal Wordpress install, edit `htdocs/wp-config.php` and change the [secret keys].  These should be uniqe for every installation.  You can generate these using the [WordPress.org secret-key service].
 
-1. Push it to CloudFoundry.
+1. Push it to Pivotal CF.
+
+  ```bash
+  cf push --no-start
+  ```
+
+This will upload the application and bind the services.  Before we start, we need to get the service credentials so we can trust the SSH server.
+
+1. To trust the ssh server's key, we need to run two commands.  The first will let us see the SSH server's host and port.  The second will generate a known_hosts file from the server.  You only need to do this the first time you use the SSHFS service.
+  
+  ```bash
+  cf env mywordpress
+  mkdir -p .ssh && ssh-keyscan -t rsa -p <port> <host> > .ssh/known_hosts
+  ```
+
+1. Push to Pivotal CF again.  This will include the known_hosts file and start the application.
 
   ```bash
   cf push
@@ -35,7 +57,7 @@ This is an out-of-the-box implementation of Wordpress 4.0.  It's an example of h
 
 When you push the application here's what happens.
 
-1. The local bits are pushed to your target.  This is small, five files around 25k. It includes the changes we made and a build pack extension for Wordpress.
+1. The local bits are pushed to your target.  This is small, nine files around 25k. It includes the changes we made and a build pack extension for Wordpress.
 1. The server downloads the [PHP Build Pack] and runs it.  This installs HTTPD and PHP.
 1. The build pack sees the extension that we pushed and runs it.  The extension downloads the stock Wordpress file from their server, unzips it and installs it into the `htdocs` directory.  It then copies the rest of the files that we pushed and replaces the default Wordpress files with them.  In this case, it's just the `wp-config.php` file.
 1. At this point, the build pack is done and CF runs our droplet.
@@ -54,9 +76,7 @@ To enable this support in this sample application, simply set the following envi
 
 |      Variable     |   Explanation                                        |
 ------------------- | -----------------------------------------------------|
-|      SSH_HOST     | The user, host name or IP address and port of your SSH server. Ex: `user@my.host.name:2222`.  Required. |
-|      SSH_PATH     | The full remote path of the directory to mount into the application file system. Required. |
-|    SSH_KEY_NAME   | The name of your SSH key.  The public and private key need to be bundled with your application under the `.ssh` directory.  These are used to authenticate with the remote SSH server. Required. |
+|      SSH_PATH     | The full remote path of the directory to mount into the application file system. Optional, defaults to the current directory on the remote host. |
 |      SSH_OPTS     | List of options passed through to `sshfs`.  Defaults to none.  Optional. |
 
 Example:
@@ -64,20 +84,19 @@ Example:
 ```
 ---
 applications:
-- name: <app-name>
+- name: <name>
   memory: 128M
   path: .
-  buildpack: https://github.com/dmikusa-pivotal/cf-php-build-pack.git
+  buildpack: https://github.com/cloudfoundry/php-buildpack#v3.1.0
+  host: <host-name>
   services:
   - mysql-db
+  - remote-fs
   env:
-    SSH_HOST: user@my-ssh-server.name
-    SSH_PATH: /home/sshfs/remote
-    SSH_KEY_NAME: sshfs
-    SSH_OPTS: '["cache=yes", "kernel_cache", "compression=no", "large_read", "Ciphers=arcfour"]'
+    SSH_OPTS: '["cache=yes", "kernel_cache", "compression=no", "large_read"]'
 ```
 
-When the above configuration is specified, the example application will take the information and mount the `SSH_PATH` to the `wp-content` directory of your Wordpress application.  This means that anything in Wordpress that would normally be written to the local file system is actually written to the remote path on the `SSH_HOST` specified.
+When the above configuration is specified, the example application will take the information and mount the `SSH_PATH` to the `wp-content` directory of your Wordpress application.  This means that anything in Wordpress that would normally be written to the local file system is actually written to the remote path on the SSHFS service bound to the app.
 
 As with the other solutions, this one is not perfect either.  Here are some things to be aware of with this solution.
 
