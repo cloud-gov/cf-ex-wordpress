@@ -27,12 +27,13 @@ def merge_defaults(ctx):
 
 
 def is_sshfs_enabled(ctx):
-    return ('SSH_HOST' in ctx.keys() and
-            'SSH_KEY_NAME' in ctx.keys() and
-            'SSH_PATH' in ctx.keys())
+    return 'sshfs' in ctx['VCAP_SERVICES'].keys() and \
+            len(ctx['VCAP_SERVICES']['sshfs']) == 1
 
 
 def process_ssh_opts(ctx):
+    if 'SSH_PATH' not in ctx.keys():
+        ctx['SSH_PATH'] = '.'
     if 'SSH_OPTS' in ctx.keys():
         try:
             opts = json.loads(ctx['SSH_OPTS'])
@@ -44,25 +45,29 @@ def process_ssh_opts(ctx):
 def enable_sshfs(ctx):
     cmds = []
     if is_sshfs_enabled(ctx):
+        # take first set of credentials
+        creds = ctx['VCAP_SERVICES']['sshfs'][0]['credentials']
         process_ssh_opts(ctx)
-        # look for ssh keys that were pushed with app, move out of public
-        #  directory and set proper permissions (cf push ruins permissions)
+        # look for known_hosts file
+        #  and set proper permissions (cf push ruins permissions)
         cmds.append(('mv', '$HOME/%s/.ssh' % ctx['WEBDIR'], '$HOME/'))
         cmds.append(('chmod', '644', '$HOME/.ssh/*'))
-        cmds.append(('chmod', '600', '$HOME/.ssh/%s' % ctx['SSH_KEY_NAME']))
         # save WP original files
         cmds.append(('mv',
                      '$HOME/%s/wp-content' % ctx['WEBDIR'],
                      '/tmp/wp-content'))
         # mount sshfs
         cmds.append(('mkdir', '-p', '$HOME/%s/wp-content' % ctx['WEBDIR']))
-        cmd = ['sshfs',
-               "%s:%s" % (ctx['SSH_HOST'], ctx['SSH_PATH']),
+        cmd = ['echo %s |' % creds['password'],
+               'sshfs',
+               "%s@%s:%s" % (creds['user'], creds['host'], ctx['SSH_PATH']),
                '$HOME/%s/wp-content' % ctx['WEBDIR'],
-               '-o IdentityFile=$HOME/.ssh/%s' % ctx['SSH_KEY_NAME'],
                '-o StrictHostKeyChecking=yes',
                '-o UserKnownHostsFile=$HOME/.ssh/known_hosts',
-               '-o idmap=user']
+               '-o password_stdin',
+               '-o port=%s' % creds['port'],
+               '-o uid=$(id -u vcap)',
+               '-o gid=$(id -g vcap)']
         cmd.extend(ctx['SSH_OPTS'])
         cmds.append(cmd)
         # copy files
@@ -101,13 +106,22 @@ def preprocess_commands(ctx):
 def service_commands(ctx):
     cmds = {}
     if is_sshfs_enabled(ctx):
+        # take first set of credentials
+        creds = ctx['VCAP_SERVICES']['sshfs'][0]['credentials']
         process_ssh_opts(ctx)
-        cmds['sshfs'] = ['sshfs', "%s:%s" % (ctx['SSH_HOST'], ctx['SSH_PATH']),
-                         '$HOME/%s/wp-content' % ctx['WEBDIR'], '-C', '-f',
-                         '-o IdentityFile=$HOME/.ssh/%s' % ctx['SSH_KEY_NAME'],
+        cmds['sshfs'] = ['echo %s |' % creds['password'],
+                         'sshfs',
+                         "%s@%s:%s" % (creds['user'],
+                                       creds['host'],
+                                       ctx['SSH_PATH']),
+                         '-f',
+                         '$HOME/%s/wp-content' % ctx['WEBDIR'],
                          '-o StrictHostKeyChecking=yes',
                          '-o UserKnownHostsFile=$HOME/.ssh/known_hosts',
-                         '-o idmap=user']
+                         '-o password_stdin',
+                         '-o port=%s' % creds['port'],
+                         '-o uid=$(id -u vcap)',
+                         '-o gid=$(id -g vcap)']
         cmds['sshfs'].extend(ctx['SSH_OPTS'])
         _log.info("cmd to run `%s`", cmds['sshfs'])
 
