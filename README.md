@@ -1,6 +1,6 @@
 ## CloudFoundry PHP Example Application:  Wordpress
 
-This is an example application which can be run on CloudFoundry using the [PHP Build Pack].  This branch contains instructions for pushing to Pivotal CloudFoundry which uses the Pivotal MySQL & Pivotal SSHFS services.
+This is an example application that can be run on CloudFoundry using the [PHP Build Pack].  This branch contains instructions for pushing to Pivotal CloudFoundry which uses the Pivotal MySQL & Pivotal SSHFS services.
 
 This is an out-of-the-box implementation of Wordpress 4.  It's an example of how common PHP applications can easily be run on CloudFoundry.
 
@@ -36,9 +36,9 @@ This is an out-of-the-box implementation of Wordpress 4.  It's an example of how
   cf push --no-start
   ```
 
-This will upload the application and bind the services.  Before we start, we need to get the service credentials so we can trust the SSH server.
+This will upload the application and bind the services, but not start the app.  Before we start it, we need to get the service credentials so we can tell sshfs to trust the SSH server.
 
-1. To trust the ssh server's key, we need to run two commands.  The first will let us see the SSH server's host and port.  The second will generate a known_hosts file from the server.  You only need to do this the first time you use the SSHFS service.
+1. To trust the ssh server's public key, we need to run two commands.  The first will let us see the SSH server's host and port.  The second will generate a known_hosts file from the server.  You only need to do this the first time you use the SSHFS service.
   
   ```bash
   cf env mywordpress
