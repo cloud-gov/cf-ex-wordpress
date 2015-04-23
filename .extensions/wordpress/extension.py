@@ -3,7 +3,6 @@
 Downloads, installs and configures WordPress
 """
 import os
-import json
 import os.path
 import logging
 from build_pack_utils import utils
@@ -13,10 +12,10 @@ _log = logging.getLogger('wordpress')
 
 
 DEFAULTS = utils.FormattedDict({
-    'WORDPRESS_VERSION': '4.1.1',  # or 'latest'
+    'WORDPRESS_VERSION': '4.2',  # or 'latest'
     'WORDPRESS_PACKAGE': 'wordpress-{WORDPRESS_VERSION}.tar.gz',
-    'WORDPRESS_HASH': '258bda90f618d7af3a2db7f22fc926d1fedb06f4',
-    'WORDPRESS_URL': 'https://wordpress.org/{WORDPRESS_PACKAGE}',
+    'WORDPRESS_HASH': '04e30f7f044be8b991fceeeb197987455bec08f9',
+    'WORDPRESS_URL': 'https://wordpress.org/{WORDPRESS_PACKAGE}'
 })
 
 
@@ -26,106 +25,13 @@ def merge_defaults(ctx):
             ctx[key] = val
 
 
-def is_sshfs_enabled(ctx):
-    return 'sshfs' in ctx['VCAP_SERVICES'].keys() and \
-            len(ctx['VCAP_SERVICES']['sshfs']) == 1
-
-
-def process_ssh_opts(ctx):
-    if 'SSH_PATH' not in ctx.keys():
-        ctx['SSH_PATH'] = '.'
-    if 'SSH_OPTS' in ctx.keys():
-        try:
-            opts = json.loads(ctx['SSH_OPTS'])
-            ctx['SSH_OPTS'] = ["-o %s" % opt for opt in opts]
-        except TypeError:
-            pass  # ignore failures to parse JSON
-
-
-def enable_sshfs(ctx):
-    cmds = []
-    if is_sshfs_enabled(ctx):
-        # take first set of credentials
-        creds = ctx['VCAP_SERVICES']['sshfs'][0]['credentials']
-        process_ssh_opts(ctx)
-        # look for known_hosts file
-        #  and set proper permissions (cf push ruins permissions)
-        cmds.append(('mv', '$HOME/%s/.ssh' % ctx['WEBDIR'], '$HOME/'))
-        cmds.append(('chmod', '644', '$HOME/.ssh/*'))
-        # save WP original files
-        cmds.append(('mv',
-                     '$HOME/%s/wp-content' % ctx['WEBDIR'],
-                     '/tmp/wp-content'))
-        # mount sshfs
-        cmds.append(('mkdir', '-p', '$HOME/%s/wp-content' % ctx['WEBDIR']))
-        cmd = ['echo %s |' % creds['password'],
-               'sshfs',
-               "%s@%s:%s" % (creds['user'], creds['host'], ctx['SSH_PATH']),
-               '$HOME/%s/wp-content' % ctx['WEBDIR'],
-               '-o StrictHostKeyChecking=yes',
-               '-o UserKnownHostsFile=$HOME/.ssh/known_hosts',
-               '-o password_stdin',
-               '-o port=%s' % creds['port'],
-               '-o uid=$(id -u vcap)',
-               '-o gid=$(id -g vcap)']
-        cmd.extend(ctx['SSH_OPTS'])
-        cmds.append(cmd)
-        # copy files
-        cmds.append(('rsync', '-rtvu',
-                     '/tmp/wp-content', '$HOME/%s' % ctx['WEBDIR']))
-        # clean up
-        cmds.append(('rm', '-rf', '/tmp/wp-content'))
-        # we unmount because we want sshfs to be run as a proc
-        #  that way if it fails, it will cause the app to fail
-        cmds.append(('fusermount',
-                     '-u', '$HOME/%s/wp-content' % ctx['WEBDIR']))
-    return cmds
-
-
-def write_sshfs_warning(ctx):
-    warning_file = os.path.join(ctx['BUILD_DIR'],
-                                ctx['WEBDIR'],
-                                'wp-content',
-                                ' WARNING_DO_NOT_EDIT_THIS_DIRECTORY')
-    with open(warning_file, 'wt') as fp:
-        fp.write("!! WARNING !! DO NOT EDIT FILES IN THIS DIRECTORY!!")
-        fp.write("\n")
-        fp.write("These files are managed by a WordPress instance running "
-                 "on CloudFoundry.  Editing them directly may break things "
-                 " and changes may be overwritten the next time the "
-                 "application is staged on CloudFoundry.")
-        fp.write("\n")
-        fp.write("YOU HAVE BEEN WARNED!!")
-
-
 # Extension Methods
 def preprocess_commands(ctx):
-    return enable_sshfs(ctx)
+    return ()
 
 
 def service_commands(ctx):
-    cmds = {}
-    if is_sshfs_enabled(ctx):
-        # take first set of credentials
-        creds = ctx['VCAP_SERVICES']['sshfs'][0]['credentials']
-        process_ssh_opts(ctx)
-        cmds['sshfs'] = ['echo %s |' % creds['password'],
-                         'sshfs',
-                         "%s@%s:%s" % (creds['user'],
-                                       creds['host'],
-                                       ctx['SSH_PATH']),
-                         '-f',
-                         '$HOME/%s/wp-content' % ctx['WEBDIR'],
-                         '-o StrictHostKeyChecking=yes',
-                         '-o UserKnownHostsFile=$HOME/.ssh/known_hosts',
-                         '-o password_stdin',
-                         '-o port=%s' % creds['port'],
-                         '-o uid=$(id -u vcap)',
-                         '-o gid=$(id -g vcap)']
-        cmds['sshfs'].extend(ctx['SSH_OPTS'])
-        _log.info("cmd to run `%s`", cmds['sshfs'])
-
-    return cmds
+    return {}
 
 
 def service_environment(ctx):
@@ -156,5 +62,4 @@ def compile(install):
         .under(workDir)
         .into('{BUILD_DIR}/{WEBDIR}')
         .done())
-    write_sshfs_warning(ctx)
     return 0
