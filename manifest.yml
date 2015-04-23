@@ -6,7 +6,5 @@ applications:
   buildpack: https://github.com/cloudfoundry/php-buildpack#v3.1.0
   host: wordpress-on
   services:
+  - sshfs-wp
   - mysql-db
-  - my-sshfs
-  env:
-    SSH_OPTS: '["cache=yes", "kernel_cache", "compression=no", "large_read"]'
