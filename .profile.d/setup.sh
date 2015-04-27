@@ -18,8 +18,14 @@ if [ "$SSHFS_CREDS" != "" ]; then
     mv "$WP_CONTENT" /tmp/wp-content
     # create a directory where we can mount sshfs
     mkdir -p "$WP_CONTENT"
-    # use mountie script to mount sshfs
-    $HOME/scripts/mount.sh
+    # use mountie to mount sshfs
+    BROKER_HOST=`echo $VCAP_SERVICES | "$HOME/scripts/json.sh" | grep '\["sshfs",0,"credentials","host"\]' | awk '{print $2}' | tr -d '"'`
+    curl -s "http://$BROKER_HOST/assets/mountie" -o "$HOME/scripts/mountie"
+    chmod +x "$HOME/scripts/mountie"
+    cd "$HOME/htdocs/"
+    "$HOME/scripts/mountie"
+    echo "Done"
+    df -h
     # copy WP original files to sshfs, -u makes it skip if remote is newer
     rsync -rtvu /tmp/wp-content "$WP_CONTENT"
     # remove WP original files
