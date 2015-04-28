@@ -4,6 +4,7 @@
 #   Author:  Daniel Mikusa <dmikusa@pivotal.io>
 #     Date:  4/23/2015
 #
+set -eo pipefail
 
 # move scripts out of public directory
 mv "$HOME/htdocs/scripts" "$HOME/"
@@ -11,25 +12,42 @@ mv "$HOME/htdocs/scripts" "$HOME/"
 # If there's an SSHFS, mount it
 SSHFS_CREDS=$(echo $VCAP_SERVICES | "$HOME/scripts/json.sh" | grep '\["sshfs"\]' | awk '{print $2}')
 if [ "$SSHFS_CREDS" != "" ]; then
-    echo "Found SSHFS, mounting to 'wp-content' directory"
+    echo "Found SSHFS bound to app."
+
+    # get credentials from the first bound sshfs service
+    FS_HOST=$(echo $VCAP_SERVICES | "$HOME/scripts/json.sh" | grep '\["sshfs",0,"credentials","host"\]' | awk '{print $2}' | tr -d '"')
+    FS_USER=$(echo $VCAP_SERVICES | "$HOME/scripts/json.sh" | grep '\["sshfs",0,"credentials","user"\]' | awk '{print $2}' | tr -d '"')
+    FS_PASS=$(echo $VCAP_SERVICES | "$HOME/scripts/json.sh" | grep '\["sshfs",0,"credentials","password"\]' | awk '{print $2}' | tr -d '"')
+    FS_PORT=$(echo $VCAP_SERVICES | "$HOME/scripts/json.sh" | grep '\["sshfs",0,"credentials","port"\]' | awk '{print $2}' | tr -d '"')
+
     # path to wp-content directory, this is where we mount the sshfs
     WP_CONTENT="$HOME/htdocs/wp-content"
+
     # move WP defaults to /tmp to save a copy
     mv "$WP_CONTENT" /tmp/wp-content
+
     # create a directory where we can mount sshfs
     mkdir -p "$WP_CONTENT"
-    # use mountie to mount sshfs
-    BROKER_HOST=`echo $VCAP_SERVICES | "$HOME/scripts/json.sh" | grep '\["sshfs",0,"credentials","host"\]' | awk '{print $2}' | tr -d '"'`
-    curl -s "http://$BROKER_HOST/assets/mountie" -o "$HOME/scripts/mountie"
-    chmod +x "$HOME/scripts/mountie"
-    cd "$HOME/htdocs/"
-    "$HOME/scripts/mountie"
-    echo "Done"
-    df -h
+
+    # use sshfs to mount the remote filesystem
+    echo "$FS_PASS" | \
+        sshfs "$FS_USER@$FS_HOST:" \
+            "$WP_CONTENT" \
+            -o StrictHostKeyChecking=no \
+            -o port=$FS_PORT \
+            -o uid=$(id -u vcap) \
+            -o gid=$(id -g vcap) \
+            -o password_stdin \
+            -o reconnect \
+            -o sshfs_debug $SSHFS_OPTS
+    df -h # just for debugging purposes
+
     # copy WP original files to sshfs, -u makes it skip if remote is newer
-    rsync -rtvu /tmp/wp-content "$WP_CONTENT"
+    rsync -rtvu /tmp/wp-content/ $(dirname "$WP_CONTENT")
+
     # remove WP original files
     rm -rf /tmp/wp-content
+
     # write a warning file to sshfs, in case someone looks at the mount directly
     WF="$WP_CONTENT/ WARNING_DO_NOT_EDIT_THIS_DIRECTORY"
     echo "!! WARNING !! DO NOT EDIT FILES IN THIS DIRECTORY!!\n" > "$WF"
@@ -38,5 +56,7 @@ if [ "$SSHFS_CREDS" != "" ]; then
     echo " and changes may be overwritten the next time the " >> "$WF"
     echo "application is staged on CloudFoundry.\n" >> "$WF"
     echo "YOU HAVE BEEN WARNED!!" >> "$WF"
+
     # we're done
+    echo "Done mounting SSHFS."
 fi
