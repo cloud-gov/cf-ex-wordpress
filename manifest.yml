@@ -6,5 +6,5 @@ applications:
   buildpack: https://github.com/cloudfoundry/php-buildpack#v3.1.0
   host: wordpress-on
   services:
-  - wp-content
+  - sshfs-wp
   - mysql-db
