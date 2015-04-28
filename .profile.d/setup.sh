@@ -9,6 +9,21 @@ set -eo pipefail
 # move scripts out of public directory
 mv "$HOME/htdocs/scripts" "$HOME/"
 
+# if there's a .ssh folder uploaded, move it outside the public folder and fix permissions
+if [ -d $HOME/htdocs/.ssh ]; then
+    mv $HOME/htdocs/.ssh $HOME/
+    chmod 600 $HOME/.ssh/*
+    chmod 644 $HOME/.ssh/*.pub || true 
+fi
+
+# if there's a known_hosts file provided, enable StrictHostKeyChecking
+if [ -f $HOME/.ssh/known_hosts ]; then
+    chmod 644 $HOME/.ssh/known_hosts 
+    SSHFS_OPTS="-o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts $SSHFS_OPTS"
+else
+    SSHFS_OPTS="-o StrictHostKeyChecking=no $SSHFS_OPTS"
+fi
+
 # If there's an SSHFS, mount it
 SSHFS_CREDS=$(echo $VCAP_SERVICES | "$HOME/scripts/json.sh" | grep '\["sshfs"\]' | awk '{print $2}')
 if [ "$SSHFS_CREDS" != "" ]; then
@@ -33,7 +48,6 @@ if [ "$SSHFS_CREDS" != "" ]; then
     echo "$FS_PASS" | \
         sshfs "$FS_USER@$FS_HOST:" \
             "$WP_CONTENT" \
-            -o StrictHostKeyChecking=no \
             -o port=$FS_PORT \
             -o uid=$(id -u vcap) \
             -o gid=$(id -g vcap) \

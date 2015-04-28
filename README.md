@@ -38,12 +38,16 @@ This is an out-of-the-box implementation of Wordpress 4.  It's an example of how
 
 This will upload the application and bind the services, but not start the app.  Before we start it, we need to get the service credentials so we can tell sshfs to trust the SSH server.
 
-1. To trust the ssh server's public key, we need to run two commands.  The first will let us see the SSH server's host and port.  The second will generate a known_hosts file from the server.  You only need to do this the first time you use the SSHFS service.
+1. Normally when sshfs connects to the remote server it will attempt to validate the certificate that is presented by the server.  It does this so that you know it's talking to the right server.  If you want it to perform this validation, you need to provide it with the public key of the SSH server.
+
+To do this we need to run the following two commands.  The first will let us see the SSH server's host and port.  The second will generate a `known_hosts` file from the server.  You only need to do this the first time you use the SSHFS service.
   
   ```bash
   cf env mywordpress
   mkdir -p .ssh && ssh-keyscan -t rsa -p <port> <host> > .ssh/known_hosts
   ```
+
+If you do not care about certificate validation, you can skip this step.  The default behavior is to use `StrictHostKeyChecking=no` which tells sshfs trust the certificate presented.
 
 1. Push to Pivotal CF again.  This will include the known_hosts file and start the application.
 
