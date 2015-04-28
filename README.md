@@ -20,10 +20,10 @@ This is an out-of-the-box implementation of Wordpress 4.  It's an example of how
   cf create-service p-mysql 250mb-dev mysql-db
   ```
 
-1.  If you don't have one already, create an SSHFS service.  With Pivotal CF, the following command will create a SSHFS instance (requires the Pivotal SSHFS tile to be deployed).
+1.  If you don't have one already, create an SSHFS service.  The name needs to be `wp-content` as the file system is mounted to a directory which is named after the service name and we need to mount the remove file system to the `htdocs/wp-content` directory.  With Pivotal CF, the following command will create a SSHFS instance (requires the Pivotal SSHFS tile to be deployed).
 
   ```bash
-  cf create-service sshfs unlimited remote-fs
+  cf create-service sshfs unlimited wp-content
   ```
 
 1. Edit the manifest.yml file.  Change the 'host' attribute to something unique.  Then under "services:" change "mysql-db" to the name of your MySQL service and "remote-fs" to the name of your SSHFS service.  These are the names of the services that will be bound to your application and should match the names you created in the previous two steps.
