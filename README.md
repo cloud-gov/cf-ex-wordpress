@@ -257,8 +257,7 @@ Consider using [continuous integration](https://cloud.gov/docs/apps/continuous-d
 ### Recommendations
 
 1. You will probably want to connect your app to some kind of SMTP service to send transactional emails like password resets.
-1. The S3 Uploads plugin rewrites the URLs used by WordPress but does not flush the rewrite rules table automatically. To get around this, you can [run a task](https://cloud.gov/docs/getting-started/one-off-tasks/) to flush the rewrite rules after every `cf push` of your app. You can also automate those tasks by using [continuous integration](https://cloud.gov/docs/apps/continuous-deployment/).
-
+1. If you're running this application in production, you probably want to [connect a `redis32` service](https://cloud.gov/docs/services/redis/) to handle local session storage. Like most PHP applications, Wordpress stores session data (like permalinks and any other [transients](https://codex.wordpress.org/Transients_API) your app might use) to the local file system. As with uploads, these will get cleared periodically due to the ephemeral file system.
 ### License
 
 See [LICENSE](LICENSE.md) for license details.
