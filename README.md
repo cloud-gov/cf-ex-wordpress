@@ -262,12 +262,3 @@ Consider using [continuous integration](https://cloud.gov/docs/apps/continuous-d
 ### License
 
 See [LICENSE](LICENSE.md) for license details.
-
-
-[PHP buildpack](http://docs.cloudfoundry.org/buildpacks/php/index.html):https://github.com/cloudfoundry/php-buildpack
-[secret keys]:https://github.com/cloudfoundry-samples/cf-ex-wordpress/blob/master/wp-config.php#L49
-[WordPress.org secret-key service]:https://api.wordpress.org/secret-key/1.1/salt
-[ClearDb]:https://www.cleardb.com/
-[local storage on CloudFoundry]:https://docs.cloudfoundry.org/devguide/deploy-apps/prepare-to-deploy.html#filesystem
-[wp-content directory]:http://codex.wordpress.org/Determining_Plugin_and_Content_Directories
-[ephemeral file system]:http://docs.cloudfoundry.org/devguide/deploy-apps/prepare-to-deploy.html#filesystem
