@@ -111,7 +111,7 @@ If you go to the URL listed under `urls` you should see a fresh WordPress site.
 This demo uses the [Human Made S3 Uploads plugin](https://github.com/humanmade/S3-Uploads), which automatically uploads files from your WordPress install to S3 and rewrites the URLs for you. The app requires no configuration. The access keys, secret key, and bucket name are stored in the environment configuration and read by the plugin on start.
 
 ```
-cf run-task gb-learns-cloud "php/bin/php htdocs/wp-cli.phar s3-uploads verify --path='/home/vcap/app/htdocs/'"
+cf run-task mywordpress "php/bin/php htdocs/wp-cli.phar s3-uploads verify --path='/home/vcap/app/htdocs/'"
 ```
 
 To see that the task ran, run `cf logs APP_NAME --recent` and you should see a line that says
