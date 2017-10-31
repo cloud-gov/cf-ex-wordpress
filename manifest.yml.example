@@ -4,7 +4,7 @@ applications:
   memory: 128M
   disk_quota: 250M
   path: .
-  buildpack: https://github.com/cloudfoundry/php-buildpack
+  buildpack: php_buildpack
   host: my-special-wordpress
   services:
   - mysql-db
