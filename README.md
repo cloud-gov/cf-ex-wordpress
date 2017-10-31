@@ -275,6 +275,7 @@ Consider using [continuous integration](https://cloud.gov/docs/apps/continuous-d
 ### Recommendations
 
 1. You will probably want to connect your app to some kind of SMTP service to send transactional emails like password resets.
+2. You will probably want to [set up zero-downtime deploys](https://github.com/contraband/autopilot) to avoid service interruptions when restaging the app.
 
 ### License
 
