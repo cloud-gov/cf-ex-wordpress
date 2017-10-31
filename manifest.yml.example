@@ -9,3 +9,5 @@ applications:
   services:
   - mysql-db
   - s3-storage
+  - redis-sessions
+  
