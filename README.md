@@ -28,9 +28,26 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
     * Template: `cf create-service SERVICE PLAN SERVICE_INSTANCE`
     * Example: `cf create-service aws-rds shared-mysql mysql-service`
 
-3. Create a service instance of S3 storage.
+3. Create a Redis service instance for session storage
 
-cloud.gov does not have persistent local storage so you'll need to rely on S3 for storing any files uploaded to WordPress. Sandbox accounts cannot create S3 storage services. Consider upgrading to a prototyping package if you need to do this.
+Like most PHP applications, Wordpress stores session data (like permalinks and any other [transients](https://codex.wordpress.org/Transients_API) your app might use) to the local file system by default. The filesystem will get cleared periodically due to restarts of the application or updates to the underlying platform. That would cause user-facing issues like unexplained logouts or inconsistent results when refreshing a page, so here you'll configure the PHP buildpack to store session data in Redis instead.
+
+  * View Services
+     * `cf marketplace`
+  * View Specific Service Plans
+     * Template: `cf marketplace -s SERVICE`
+     * Example: `cf marketplace -s redis32`
+  * Create Service Instance
+     * Template: `cf create-service SERVICE PLAN SERVICE_INSTANCE`
+     * Example: `cf create-service redis32 micro redis-sessions`
+
+(If you pick a name other than `redis-sessions`, you'll need to edit `.bp-config/options.json` to specify it.)
+
+4. Create an S3 storage service instance
+
+cloud.gov does not have persistent local storage so you'll need to rely on S3 for storing any files uploaded to WordPress. Without S3 available, any files you upload will vanish whenever the underlying platform is updated.
+
+(Sandbox accounts cannot create S3 storage services. Consider upgrading to a prototyping package if you need access to S3 storage services!)
 
   * View Services
      * `cf marketplace`
@@ -41,22 +58,23 @@ cloud.gov does not have persistent local storage so you'll need to rely on S3 fo
      * Template: `cf create-service SERVICE PLAN SERVICE_INSTANCE`
      * Example: `cf create-service s3 basic-public s3-service`
 
-4. Copy the example `manifest.yml.example` to `manifest.yml`. Edit the `manifest.yml` file.
+5. Copy the example `manifest.yml.example` to `manifest.yml`. Edit the `manifest.yml` file.
   * Change the 'name' and 'host' attributes to something unique for your site.
   * Under "services:" change
-    * "mysql-service" to the name of your MySQL service you created in Step 2.
-    * "s3-storage" to the name of your S3 service you created in Step 3. Or delete this line if you're not using S3.
+    * "mysql-service" to the name of the MySQL instance you created in Step 2.
+    * "redis-sessions" to the name of the Redis instance
+    * "s3-storage" to the name of your S3 instance you created in Step 4. Or delete this line if you're not using S3.
   * The memory and disk allocations in the example `manifest.yml` file should be [sufficient for WordPress](https://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP) but may need to be adjusted depending on your specific needs.
 
-5. Copy the example `setup.json.example` to `setup.json`. Edit the `setup.json` file for your specific WordPress site information, plugins you want installed, and themes.
+6. Copy the example `setup.json.example` to `setup.json`. Edit the `setup.json` file for your specific WordPress site information, plugins you want installed, and themes.
   * **NOTE** The example includes a set of plugins that will be used to attach to your previously created S3 storage so you can store media uploads, like pictures, for your WordPress site. If you do not use these plugins, every time you deploy, uploaded files will be lost.
   * See: [Setup JSON](#setup-json) for more information about the format of this file
 
-6. Deploy the app with a no start command with`cf push --no-start`
+7. Deploy the app with a no start command with `cf push --no-start`
 
 This will download and install WordPress, configure it to use your MySQL service, and install all your plugins and themes but will not start the application on cloud.gov.
 
-7. Set environment variables for secret keys using [WordPress Secret Key Generator](https://api.wordpress.org/secret-key/1.1/salt/).
+8. Set environment variables for secret keys using [WordPress Secret Key Generator](https://api.wordpress.org/secret-key/1.1/salt/).
 
 Make sure to include the leading and closing `'` characters to avoid errors escaping special characters.
 
@@ -71,7 +89,7 @@ Make sure to include the leading and closing `'` characters to avoid errors esca
   cf set-env mywordpress NONCE_SALT YOUR_KEY
   ```
 
-8. Push it to CloudFoundry.
+9. Push it to CloudFoundry.
 
 Run:
 
@@ -106,12 +124,12 @@ You should see output like this in your terminal:
 If you go to the URL listed under `urls` you should see a fresh WordPress site.
 
 
-9. Verify S3 connection
+10. Verify S3 connection
 
 This demo uses the [Human Made S3 Uploads plugin](https://github.com/humanmade/S3-Uploads), which automatically uploads files from your WordPress install to S3 and rewrites the URLs for you. The app requires no configuration. The access keys, secret key, and bucket name are stored in the environment configuration and read by the plugin on start.
 
 ```
-cf run-task gb-learns-cloud "php/bin/php htdocs/wp-cli.phar s3-uploads verify --path='/home/vcap/app/htdocs/'"
+cf run-task mywordpress "php/bin/php htdocs/wp-cli.phar s3-uploads verify --path='/home/vcap/app/htdocs/'"
 ```
 
 To see that the task ran, run `cf logs APP_NAME --recent` and you should see a line that says
@@ -120,7 +138,7 @@ To see that the task ran, run `cf logs APP_NAME --recent` and you should see a l
 OUT Success: Looks like your configuration is correct.
 ```
 
-10. Log in and test
+11. Log in and test
 
 To test everything is correct, log in to your WordPress site with the credentials in your `setup.json` file. You should be able to do any admin activities including creating a new post and uploading a media file to it.
 
@@ -257,7 +275,7 @@ Consider using [continuous integration](https://cloud.gov/docs/apps/continuous-d
 ### Recommendations
 
 1. You will probably want to connect your app to some kind of SMTP service to send transactional emails like password resets.
-1. If you're running this application in production, you probably want to [connect a `redis32` service](https://cloud.gov/docs/services/redis/) to handle local session storage. Like most PHP applications, Wordpress stores session data (like permalinks and any other [transients](https://codex.wordpress.org/Transients_API) your app might use) to the local file system. As with uploads, these will get cleared periodically due to the ephemeral file system.
+
 ### License
 
 See [LICENSE](LICENSE.md) for license details.

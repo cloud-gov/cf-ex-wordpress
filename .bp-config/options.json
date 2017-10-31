@@ -1,4 +1,4 @@
 {
-    "ADMIN_EMAIL": "dan@mikusa.com",
-    "PHP_EXTENSIONS": ["mbstring", "mysqli", "mcrypt", "gd", "zip", "curl", "openssl", "sockets", "zlib"]
+    "ADMIN_EMAIL": "your.name@agency.gov",
+    "REDIS_SESSION_STORE_SERVICE_NAME": "redis-sessions"
 }
