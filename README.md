@@ -26,7 +26,7 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
     * Example: `cf marketplace -s aws-rds`
  * Create Service Instance
     * Template: `cf create-service SERVICE PLAN SERVICE_INSTANCE`
-    * Example: `cf create-service aws-rds shared-mysql mysql-service`
+    * Example: `cf create-service aws-rds micro-mysql mysql-service` (note: if this is for a production environment, use one of the plans with `-redundant` in the plan name for better availability)
 
 3. Create a service instance of S3 storage.
 
