@@ -26,7 +26,7 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
     * Example: `cf marketplace -s aws-rds`
  * Create Service Instance
     * Template: `cf create-service SERVICE PLAN SERVICE_INSTANCE`
-    * Example: `cf create-service aws-rds shared-mysql mysql-service`
+    * Example: `cf create-service aws-rds micro-mysql mysql-service` (note: if this is for a production environment, use one of the plans with `-redundant` in the plan name for better availability)
 
 3. Create a service instance of S3 storage.
 
@@ -39,7 +39,7 @@ cloud.gov does not have persistent local storage so you'll need to rely on S3 fo
      * Example: `cf marketplace -s s3`
   * Create Service Instance
      * Template: `cf create-service SERVICE PLAN SERVICE_INSTANCE`
-     * Example: `cf create-service s3 basic-public s3-service`
+     * Example: `cf create-service s3 basic s3-service`
 
 4. Copy the example `manifest.yml.example` to `manifest.yml`. Edit the `manifest.yml` file.
   * Change the 'name' and 'host' attributes to something unique for your site.
