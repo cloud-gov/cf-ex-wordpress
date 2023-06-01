@@ -39,7 +39,7 @@ cloud.gov does not have persistent local storage so you'll need to rely on S3 fo
      * Example: `cf marketplace -s s3`
   * Create Service Instance
      * Template: `cf create-service SERVICE PLAN SERVICE_INSTANCE`
-     * Example: `cf create-service s3 basic s3-service`
+     * Example: `cf create-service s3 basic-public s3-service`
 
 4. Copy the example `manifest.yml.example` to `manifest.yml`. Edit the `manifest.yml` file.
   * Change the 'name' and 'host' attributes to something unique for your site.
