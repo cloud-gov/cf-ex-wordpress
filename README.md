@@ -13,50 +13,55 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
 
 1. Clone this repo.
 
-  ```bash
-  git clone https://github.com/18F/cf-ex-wordpress.git cf-ex-wordpress
-  cd cf-ex-wordpress
-  ```
+    ```bash
+    git clone https://github.com/18F/cf-ex-wordpress.git cf-ex-wordpress
+    cd cf-ex-wordpress
+    ```
 
-1. Create a service instance of a MySQL Database
+1. Create a service instance of a MySQL Database:
 
-    - View Services: `cf marketplace`
-    - View database service Plans `cf marketplace -s aws-rds`
-    - Create Service Instance
-        -Template: `cf create-service SERVICE PLAN SERVICE_INSTANCE`
-        -Example: `cf create-service aws-rds micro-mysql mysql-service` (note: if this is for a production environment, use one of the plans with `-redundant` in the plan name for better availability)
+    ```bash
+    # note: if this is for a production environment, use one of the plans with `-redundant` in the plan name for better availability
+    # run `cf marketplace -s aws-rds` to see available database plans
+    cf create-service aws-rds micro-mysql mysql-db
+    ```
 
-1. Create a service instance of S3 storage.
+    See the [cloud.gov website page on database services.](https://cloud.gov/docs/services/relational-database/) for more information.
 
-    cloud.gov does not have persistent local storage so you'll need to rely on S3 for storing any files uploaded to WordPress. Sandbox accounts cannot create S3 storage services. Consider upgrading to a prototyping package if you need to do this.
+1. Create a service instance of S3 storage:
 
-    - View Services
-      -`cf marketplace`
-    - View Specific Service Plans
-      - Template: `cf marketplace -s SERVICE`
-      - Example: `cf marketplace -s s3`
-    - Create Service Instance
-      - Template: `cf create-service SERVICE PLAN SERVICE_INSTANCE`
-      - Example: `cf create-service s3 basic-public s3-service`
+    ```bash
+    # run `cf marketplace -s s3` to see available S3 plans
+    cf create-service s3 basic-public s3-storage
+    ```
 
-1. Copy the example `manifest.yml.example` to `manifest.yml`. Edit the `manifest.yml` file.
+    **Note**: cloud.gov does not have persistent local storage so you'll need to rely on S3 for storing any files uploaded to WordPress. Sandbox accounts cannot create S3 storage services. Consider upgrading to a prototyping package if you need to do this.
 
-  - Change the 'name' and 'host' attributes to something unique for your site.
-  - Under "services:" change
-    - "mysql-service" to the name of your MySQL service you created in Step 2.
-    -" s3-storage" to the name of your S3 service you created in Step 3. Or delete this line if you're not using S3.
-  - The memory and disk allocations in the example `manifest.yml` file should be [sufficient for WordPress](https://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP) but may need to be adjusted depending on your specific needs.
+    [See the cloud.gov website page on S3 services for more information.](https://cloud.gov/docs/services/s3/)
+
+1. Copy the example `manifest.yml.example` to `manifest.yml`. Edit the `manifest.yml` file:
+
+    - Change the `host` and `host` attributes to something unique for your site.
+    - Under `services:` change
+      - `mysql-db` to the name of your MySQL service you created in Step 2.
+      - `s3-storage` to the name of your S3 service you created in Step 3. Or delete this line if you're not using S3.
+    - The memory and disk allocations in the example `manifest.yml` file should be [sufficient for WordPress](https://developer.wordpress.org/apis/wp-config-php/#increasing-memory-allocated-to-php) but may need to be adjusted depending on your specific needs.
 
 1. Copy the example `setup.json.example` to `setup.json`. Edit the `setup.json` file for your specific WordPress site information, plugins you want installed, and themes.
 
-    - **NOTE** The example includes a set of plugins that will be used to attach to your previously created S3 storage so you can store media uploads, like pictures, for your WordPress site. If you do not use these plugins, every time you deploy, uploaded files will be lost.
-    - See: [Setup JSON](#setup-json) for more information about the format of this file
+    - **NOTE:** The example includes a set of plugins that will be used to attach to your previously created S3 storage so you can store media uploads, like pictures, for your WordPress site. If you do not use these plugins, every time you deploy, uploaded files will be lost.
+    - See: [Setup JSON](#full-example-setupjson-file) for more information about the format of this file
 
-1. Deploy the app with a no start command with`cf push --no-start`
+1. Deploy the app with a no start command:
+
+    ```bash
+    cf push --no-start
+    ```
 
     This will download and install WordPress, configure it to use your MySQL service, and install all your plugins and themes but will not start the application on cloud.gov.
 
-1. Copy the example `setup.sh.example` to `setup.sh` and replace the placeholder `YOUR-KEY` with the values from the [WordPress Secret Key Generator](https://api.wordpress.org/secret-key/1.1/salt/). Make sure to `chomd +x` the file, and then run it and pass in the name of your app: `./setup.sh mywordpress`. This will set these values as environmental values in the cloud.gov environment. Note - Make sure to include the leading and closing `'` characters to avoid errors escaping special characters.
+1. Copy the example `setup.sh.example` to `setup.sh`.
+1. Update `setup.sh` and replace the placeholder `YOUR-KEY` with the values from the [WordPress Secret Key Generator](https://api.wordpress.org/secret-key/1.1/salt/). Make sure to `chomd +x` the file, and then run it and pass in the name of your app: `./setup.sh mywordpress`. This will set these values as environmental values in the cloud.gov environment. **Note - Make sure to include the leading and closing `'` characters to avoid errors escaping special characters**.
 
 1. Push the Wordpress application to CloudFoundry:
 
@@ -84,13 +89,13 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
     usage: 128M x 1 instances
     urls: my-special-wordpress.app.cloud.gov
     last uploaded: Tue Sep 26 22:21:49 UTC 2017
-    stack: cflinuxfs2
+    stack: cflinuxfs4
     buildpack: https://github.com/cloudfoundry/php-buildpack
     ```
 
     If you go to the URL listed under `urls` you should see a fresh WordPress site.
 
-1. Verify S3 connection
+1. Verify S3 connection:
 
     This demo uses the [Human Made S3 Uploads plugin](https://github.com/humanmade/S3-Uploads), which automatically uploads files from your WordPress install to S3 and rewrites the URLs for you. The app requires no configuration. The access keys, secret key, and bucket name are stored in the environment configuration and read by the plugin on start.
 
@@ -98,13 +103,13 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
     cf run-task mywordpress "php/bin/php htdocs/wp-cli.phar s3-uploads verify --path='/home/vcap/app/htdocs/'"
     ```
 
-    To see that the task ran, run `cf logs APP_NAME --recent` and you should see a line that says
+    To see that the task ran, run `cf logs APP_NAME --recent` and you should see a line that says:
 
     ```shell
     OUT Success: Looks like your configuration is correct.
     ```
 
-1. Log in and test
+1. Log in and test:
 
     To test everything is correct, log in to your WordPress site with the credentials in your `setup.json` file. You should be able to do any admin activities including creating a new post and uploading a media file to it.
 
@@ -154,21 +159,21 @@ For plugins or themes you'd normally be able to install from the admin interface
 
 ```json
 "plugins": [
-    {
-      "url": "https://github.com/humanmade/S3-Uploads/archive/v1.1.0.zip"
-    },
-    {
-      "name": "akismet",
-      "version": "4.0"
-    },
-    {
-      "name": "hello-dolly"
-    }
+  {
+    "url": "https://github.com/humanmade/S3-Uploads/archive/v1.1.0.zip"
+  },
+  {
+    "name": "akismet",
+    "version": "4.0"
+  },
+  {
+    "name": "hello-dolly"
+  }
 ],
 "themes": [
     {
-        "name": "create",
-        "version": "1.3"
+      "name": "create",
+      "version": "1.3"
     }
   ]
 ```
