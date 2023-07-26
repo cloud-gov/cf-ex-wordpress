@@ -41,7 +41,7 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
 
 1. Copy the example `manifest.yml.example` to `manifest.yml`. Edit the `manifest.yml` file:
 
-    - Change the `host` and `host` attributes to something unique for your site.
+    - Change the `name` and `host` attributes to something unique for your site.
     - Under `services:` change
       - `mysql-db` to the name of your MySQL service you created in Step 2.
       - `s3-storage` to the name of your S3 service you created in Step 3. Or delete this line if you're not using S3.
