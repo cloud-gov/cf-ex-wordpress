@@ -60,8 +60,21 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
 
     This will download and install WordPress, configure it to use your MySQL service, and install all your plugins and themes but will not start the application on cloud.gov.
 
-1. Copy the example `setup.sh.example` to `setup.sh`.
-1. Update `setup.sh` and replace the placeholder `YOUR-KEY` with the values from the [WordPress Secret Key Generator](https://api.wordpress.org/secret-key/1.1/salt/). Make sure to `chomd +x` the file, and then run it and pass in the name of your app: `./setup.sh mywordpress`. This will set these values as environmental values in the cloud.gov environment. **Note - Make sure to include the leading and closing `'` characters to avoid errors escaping special characters**.
+1. Copy the example `setup.sh.example` to `setup.sh` and then:
+1. Update `setup.sh` and replace the placeholder `YOUR-KEY` with the values from the [WordPress Secret Key Generator](https://api.wordpress.org/secret-key/1.1/salt/).
+1. Make sure to `chmod +x` the file:
+
+    ```bash
+    chmod +x setup.sh
+    ```
+
+1. Run it and pass in the name of your app:
+
+    ```bash
+    ./setup.sh mywordpress
+    ```
+
+    This will set these values as environmental values in the cloud.gov environment. **Note - Make sure to include the leading and closing `'` characters to avoid errors escaping special characters**.
 
 1. Push the Wordpress application to CloudFoundry:
 
