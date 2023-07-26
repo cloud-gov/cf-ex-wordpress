@@ -2,6 +2,11 @@
 
 APP_NAME=$1
 
+if [[ -z "$APP_NAME" ]]; then
+  echo "app name is required as first argument to the script"
+  exit 1
+fi
+
 cf set-env $APP_NAME AUTH_KEY YOUR-KEY
 cf set-env $APP_NAME SECURE_AUTH_KEY YOUR-KEY
 cf set-env $APP_NAME LOGGED_IN_KEY YOUR-KEY
