@@ -22,7 +22,7 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
 
     ```bash
     # note: if this is for a production environment, use one of the plans with `-redundant` in the plan name for better availability
-    # run `cf marketplace -s aws-rds` to see available database plans
+    # run `cf marketplace -e aws-rds` to see available database plans
     cf create-service aws-rds micro-mysql mysql-db
     ```
 
@@ -31,7 +31,7 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
 1. Create a service instance of S3 storage:
 
     ```bash
-    # run `cf marketplace -s s3` to see available S3 plans
+    # run `cf marketplace -e s3` to see available S3 plans
     cf create-service s3 basic-public s3-storage
     ```
 
@@ -68,7 +68,7 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
     chmod +x setup.sh
     ```
 
-1. Run it and pass in the name of your app:
+1. Run it and pass in the name of your app that you set in `manifest.yml`:
 
     ```bash
     ./setup.sh mywordpress
@@ -113,7 +113,10 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
     This demo uses the [Human Made S3 Uploads plugin](https://github.com/humanmade/S3-Uploads), which automatically uploads files from your WordPress install to S3 and rewrites the URLs for you. The app requires no configuration. The access keys, secret key, and bucket name are stored in the environment configuration and read by the plugin on start.
 
     ```shell
+    # for CF CLI v7
     cf run-task mywordpress "php/bin/php htdocs/wp-cli.phar s3-uploads verify --path='/home/vcap/app/htdocs/'"
+    # for CF CLI v8
+    cf run-task mywordpress --command "php/bin/php htdocs/wp-cli.phar s3-uploads verify --path='/home/vcap/app/htdocs/'"
     ```
 
     To see that the task ran, run `cf logs APP_NAME --recent` and you should see a line that says:
