@@ -8,5 +8,8 @@
         "curl",
         "sockets",
         "zlib"
+    ],
+    "ADDITIONAL_PREPROCESS_CMDS": [
+        "$HOME/htdocs/bootstrap.sh"
     ]
 }
