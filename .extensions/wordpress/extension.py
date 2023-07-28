@@ -46,7 +46,7 @@ def service_environment(ctx):
     return {}
 
 def install_wpcli(workDir):
-    print 'Installing wp-cli'
+    print('Installing wp-cli')
     args = ['curl', '-O', 'https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar']
     subprocess.call(args, cwd=workDir)
     args = ['chmod', '+x', 'wp-cli.phar']
@@ -71,7 +71,7 @@ def install_wordpress(ctx, builder, wordpressDir):
     # set the library path so php can find it's extension
     os.environ['LD_LIBRARY_PATH'] = os.path.join(ctx['BUILD_DIR'], 'php', 'lib')
 
-    print 'Installing WordPress'
+    print('Installing WordPress')
     setupjson = load_json(wordpressDir)
     if setupjson.has_key('wordpress_version'):
         args = [phpcmd, '-c', phpconfig, 'wp-cli.phar', 'core', 'download', '--version=%s' % setupjson['wordpress_version']]
