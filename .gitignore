@@ -6,3 +6,4 @@ setup.sh
 manifest.yml
 vendor
 wp-*
+htdocs
