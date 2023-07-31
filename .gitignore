@@ -5,5 +5,5 @@ setup.json
 setup.sh
 manifest.yml
 vendor
-wp-*
+wp-content
 htdocs
