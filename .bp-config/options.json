@@ -10,6 +10,6 @@
         "zlib"
     ],
     "ADDITIONAL_PREPROCESS_CMDS": [
-        "$HOME/htdocs/bootstrap.sh"
+        "$HOME/htdocs/scripts/bootstrap.sh"
     ]
 }
