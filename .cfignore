@@ -10,5 +10,6 @@ setup.sh
 /vendor/
 /wp-content
 /htdocs
+/wordpress
 
 .DS_Store
