@@ -56,6 +56,14 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
 
 1. Copy the example `setup.sh.example` to `setup.sh` and then:
 1. Update `setup.sh` and replace the placeholder `YOUR-KEY` with the values from the [WordPress Secret Key Generator](https://api.wordpress.org/secret-key/1.1/salt/).
+1. Update `setup.sh` to set the values that will be used when installing your site:
+
+    - `SITE_NAME`: name for your Wordpress site
+    - `SITE_URL`: URL for your website, which should either be the URL ending in `app.cloud.gov` printed by CloudFoundry after `cf push` or your custom agency domain (e.g. `agency.gov`)
+    - `ACCOUNT_NAME`: name for your site's admin user account
+    - `ACCOUNT_EMAIL`: email address for your admin user account
+    - `ACCOUNT_PASS`: password for your site's admin user account
+
 1. Make sure to `chmod +x` the file:
 
     ```bash
@@ -70,32 +78,20 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
 
     This will set these values as environmental values in the cloud.gov environment. **Note - Make sure to include the leading and closing `'` characters to avoid errors escaping special characters**.
 
-1. Install Wordpress using the CLI:
-
-    ```bash
-    # for CF CLI v7
-    cf run-task mywordpress "wp core install --title='<SITE-NAME>' --url='<SITE-URL>' --admin_user='<ACCOUNT-NAME>' --admin_email='<ACCOUNT-EMAIL>' --admin_password='<ACCOUNT-PASS>' --path='/home/vcap/app/htdocs/'"
-    # for CF CLI v8
-    cf run-task mywordpress --command "wp core install --title='<SITE-NAME>' --url='<SITE-URL>' --admin_user='<ACCOUNT-NAME>' --admin_email='<ACCOUNT-EMAIL>' --admin_password='<ACCOUNT-PASS>' --path='/home/vcap/app/htdocs/'"
-    ```
-
-    with the following values:
-
-    - `SITE-NAME`: name for your Wordpress site
-    - `SITE-URL`: URL for your website, which should either be the URL ending in `app.cloud.gov` printed by CloudFoundry after `cf push` or your custom agency domain (e.g. `agency.gov`)
-    - `ACCOUNT-NAME`: name for your site's admin user account
-    - `ACCOUNT-EMAIL`: email address for your admin user account
-    - `ACCOUNT-PASS`: password for your site's admin user account
-
 1. Push the Wordpress application to CloudFoundry:
 
     ```bash
     cf push
     ```
 
-    On `cf push`, the server downloads and runs the [PHP buildpack](http://docs.cloudfoundry.org/buildpacks/php/index.html) which installs HTTPD and PHP. The buildpack includes the `composer` extension, so it sees `compser.json` and installs the defined packages from there, including Wordpress, the WP CLI, and some plugins/themes. Then, [a custom script](./scripts/bootstrap.sh) copies the Wordpress files installed by `composer` into the web root for the application. Once all that is finished, the platform starts the application. Now you have a WordPress site.
+    On `cf push`:
 
-    You should see output like this in your terminal:
+    - The server downloads and runs the [PHP buildpack](http://docs.cloudfoundry.org/buildpacks/php/index.html) which installs HTTPD and PHP
+    - The buildpack includes the `composer` extension, so it sees `compser.json` and installs the defined packages from there, including Wordpress, the WP CLI, and some plugins/themes
+    - [A custom script](./scripts/bootstrap.sh) copies the Wordpress files installed by `composer` into the web root for the application and installs Wordpress using the environment variables configured in `setup.sh`
+    - The platform starts the application
+
+    Now you have a WordPress site. You should see output like this in your terminal:
 
     ```shell
     App started
