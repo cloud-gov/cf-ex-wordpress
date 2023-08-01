@@ -92,7 +92,12 @@ define('WPLANG', '');
  */
 define('WP_DEBUG', false);
 
-require_once getenv('HOME') . '/app/lib/vendor/autoload.php';
+$HOME = getenv('HOME');
+$APP_ROOT = $HOME;
+if (!str_ends_with($HOME, 'app'))
+	$APP_ROOT = $APP_ROOT . '/app';
+
+require_once $APP_ROOT . '/lib/vendor/autoload.php';
 
 /* That's all, stop editing! Happy blogging. */
 
