@@ -6,7 +6,6 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
 
 1. [Installation](#installation)
 1. [Administering your WordPress site](#administering-your-wordpress-site)
-1. [Full example setup.json file](#full-example-setupjson-file)
 1. [Recommendations](#recommendations)
 
 ## Installation
@@ -74,7 +73,10 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
 1. Install Wordpress using the CLI:
 
     ```bash
-    cf run-task mywordpress --command "wp core install --title=<SITE-NAME> --url=<SITE-URL> --admin_user=<ACCOUNT-NAME> --admin_email=<ACCOUNT-EMAIL> --admin_password=<ACCOUNT-PASS> --path='/home/vcap/app/htdocs/'"
+    # for CF CLI v7
+    cf run-task mywordpress "wp core install --title='<SITE-NAME>' --url='<SITE-URL>' --admin_user='<ACCOUNT-NAME>' --admin_email='<ACCOUNT-EMAIL>' --admin_password='<ACCOUNT-PASS>' --path='/home/vcap/app/htdocs/'"
+    # for CF CLI v8
+    cf run-task mywordpress --command "wp core install --title='<SITE-NAME>' --url='<SITE-URL>' --admin_user='<ACCOUNT-NAME>' --admin_email='<ACCOUNT-EMAIL>' --admin_password='<ACCOUNT-PASS>' --path='/home/vcap/app/htdocs/'"
     ```
 
     with the following values:
