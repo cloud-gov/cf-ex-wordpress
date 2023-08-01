@@ -8,10 +8,12 @@ if [[ $HOME != *"app"* ]]; then
   APP_ROOT="$APP_ROOT/app"
 fi
 
+WEBROOT="$APP_ROOT/htdocs"
+
 # Copy wordpress files into web root folder if they
 # haven't been already
-if [ ! -d "$APP_ROOT/htdocs/wp-content" ]; then
+if [ ! -d "$WEBROOT/wp-content" ]; then
   echo "Copying Wordpress files into place"
   cd "$APP_ROOT/wordpress" || exit
-  cp -R ./* "$APP_ROOT/htdocs"
+  cp -R ./* "$WEBROOT"
 fi
