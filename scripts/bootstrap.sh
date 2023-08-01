@@ -17,3 +17,14 @@ if [ ! -d "$WEBROOT/wp-content" ]; then
   cd "$APP_ROOT/wordpress" || exit
   cp -R ./* "$WEBROOT"
 fi
+
+if ! wp core is-installed --path="$WEBROOT"; then
+  echo "Installing Wordpress"
+  wp core install \
+    --path="$WEBROOT/" \
+    --title="$SITE_NAME" \
+    --url="$SITE_URL" \
+    --admin_user="$ACCOUNT_NAME" \
+    --admin_email="$ACCOUNT_EMAIL" \
+    --admin_password="$ACCOUNT_PASS"
+fi
