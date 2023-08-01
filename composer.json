@@ -14,7 +14,8 @@
     "humanmade/s3-uploads": "^3.0",
     "wpackagist-plugin/akismet": "^5.2",
     "wpackagist-theme/create": "^2.9",
-    "wp-cli/wp-cli": "^2.8"
+    "wp-cli/wp-cli": "^2.8",
+    "wp-cli/core-command": "^2.1"
   },
   "config": {
     "allow-plugins": {
