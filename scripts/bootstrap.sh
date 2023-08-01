@@ -1,5 +1,5 @@
 #!/bin/bash
 
-APP_ROOT=$(dirname "${BASH_SOURCE[0]}")
-
-cp ../wp-config.php wordpress
+# Copy wordpress files into web root folder (htdocs)
+cd "$HOME/app/wordpress" || exit
+cp -R ./* "$HOME/app/htdocs"
