@@ -114,9 +114,9 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
 
     ```shell
     # for CF CLI v7
-    cf run-task mywordpress "php/bin/php htdocs/wp-cli.phar s3-uploads verify --path='/home/vcap/app/htdocs/'"
+    cf run-task mywordpress "wp s3-uploads verify --path='/home/vcap/app/htdocs/'"
     # for CF CLI v8
-    cf run-task mywordpress --command "php/bin/php htdocs/wp-cli.phar s3-uploads verify --path='/home/vcap/app/htdocs/'"
+    cf run-task mywordpress --command "wp s3-uploads verify --path='/home/vcap/app/htdocs/'"
     ```
 
     To see that the task ran, run `cf logs APP_NAME --recent` and you should see a line that says:
