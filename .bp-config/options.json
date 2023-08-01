@@ -1,4 +1,14 @@
 {
+    "PHP_EXTENSIONS": [
+        "mysqli",
+        "openssl",
+        "mbstring",
+        "gd",
+        "zip",
+        "curl",
+        "sockets",
+        "zlib"
+    ],
     "ADDITIONAL_PREPROCESS_CMDS": [
         "$HOME/htdocs/scripts/bootstrap.sh"
     ]
