@@ -158,7 +158,7 @@ We **do not recommend** using the wp-admin interface to manage updates to your s
 
 ### Themes and plugins
 
-The Cloud Foundry platform builds apps with ephemeral local storage. This means any changes made to local files on your app will get deleted whenever you `push` or `restage` the app. Make sure your plugins and themes remain installed by installing them through the `composer.json` file.
+The Cloud Foundry platform builds apps with ephemeral local storage. This means any changes made to local files on your app will get deleted whenever you `push` or `restage` the app. Make sure your plugins and themes remain installed by installing them through the `composer.json` file using [`composer require`](https://getcomposer.org/doc/03-cli.md#require-r).
 
 By default, these plugins/themes are included:
 
@@ -172,7 +172,7 @@ As with WordPress Core, make sure to watch for and install updates for the plugi
 
 ### Running WP-CLI commands
 
-We recommend using Cloud Foundry's "tasks" to run `wp-cli` commands. To do this, make sure to give the full path for both PHP and the `wp-cli.phar` file and specify the WordPress path relative to the `app` directory. Here's how you'd run `wp core version` on your cloud.gov container:
+We recommend using Cloud Foundry's "tasks" to run `wp-cli` commands. To do this, make sure to specify the WordPress path relative to the `app` directory. Here's how you would run `wp core version` on your cloud.gov container:
 
 ```bash
 # for CF CLI v7
