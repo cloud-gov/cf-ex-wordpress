@@ -4,8 +4,7 @@
  *
  * This file has the following configurations: MySQL settings, Table Prefix,
  * Secret Keys, WordPress Language, and ABSPATH. You can find more information
- * by visiting {@link http://codex.wordpress.org/Editing_wp-config.php Editing
- * wp-config.php} Codex page. You can get the MySQL settings from your web host.
+ * by visiting {@link https://developer.wordpress.org/apis/wp-config-php/}. You can get the MySQL settings from your web host.
  *
  * This file is used by the wp-config.php creation script during the
  * installation. You don't have to use the web site, you can just copy this file
@@ -15,7 +14,7 @@
  */
 
 // ** Read MySQL service properties from _ENV['VCAP_SERVICES']
-$services = json_decode($_ENV['VCAP_SERVICES'], true);
+$services = json_decode(getenv('VCAP_SERVICES'), true);
 $service = $services['aws-rds'][0];  // pick the first MySQL service
 
 define('WP_USE_EXT_MYSQL', false);
@@ -48,23 +47,24 @@ define('DB_COLLATE', '');
  *
  * @since 2.6.0
  */
- define('AUTH_KEY', $_ENV['AUTH_KEY']);
- define('SECURE_AUTH_KEY', $_ENV['SECURE_AUTH_KEY']);
- define('LOGGED_IN_KEY', $_ENV['LOGGED_IN_KEY']);
- define('NONCE_KEY', $_ENV['NONCE_KEY']);
- define('AUTH_SALT', $_ENV['AUTH_SALT']);
- define('SECURE_AUTH_SALT', $_ENV['SECURE_AUTH_SALT']);
- define('LOGGED_IN_SALT', $_ENV['LOGGED_IN_SALT']);
- define('NONCE_SALT', $_ENV['NONCE_SALT']);
+define('AUTH_KEY', getenv('AUTH_KEY'));
+define('SECURE_AUTH_KEY', getenv('SECURE_AUTH_KEY'));
+define('LOGGED_IN_KEY', getenv('LOGGED_IN_KEY'));
+define('NONCE_KEY', getenv('NONCE_KEY'));
+define('AUTH_SALT', getenv('AUTH_SALT'));
+define('SECURE_AUTH_SALT', getenv('SECURE_AUTH_SALT'));
+define('LOGGED_IN_SALT', getenv('LOGGED_IN_SALT'));
+define('NONCE_SALT', getenv('NONCE_SALT'));
 /**#@-*/
 
 /** S3 Uploads Keys **/
 $s3service = $services['s3'][0]; // pick the first S3 service
-define( 'S3_UPLOADS_BUCKET', $s3service['credentials']['bucket'] );
-define( 'S3_UPLOADS_KEY', $s3service['credentials']['access_key_id'] );
-define( 'S3_UPLOADS_SECRET', $s3service['credentials']['secret_access_key'] );
-define( 'S3_UPLOADS_REGION', $s3service['credentials']['region'] );
-define( 'S3_UPLOADS_BUCKET_URL', "https://s3-" . $s3service['credentials']['region'] . ".amazonaws.com/" . $s3service['credentials']['bucket'] );
+define('S3_UPLOADS_BUCKET', $s3service['credentials']['bucket']);
+define('S3_UPLOADS_KEY', $s3service['credentials']['access_key_id']);
+define('S3_UPLOADS_SECRET', $s3service['credentials']['secret_access_key']);
+define('S3_UPLOADS_REGION', $s3service['credentials']['region']);
+define('S3_UPLOADS_BUCKET_URL', "https://s3-" . $s3service['credentials']['region'] . ".amazonaws.com/" . $s3service['credentials']['bucket']);
+
 /**
  * WordPress Database Table prefix.
  *
@@ -91,6 +91,13 @@ define('WPLANG', '');
  * in their development environments.
  */
 define('WP_DEBUG', false);
+
+/** Include composer autoload file */
+$HOME = getenv('HOME');
+$APP_ROOT = $HOME;
+if (!str_ends_with($HOME, 'app'))
+	$APP_ROOT = $APP_ROOT . '/app';
+require_once $APP_ROOT . '/lib/vendor/autoload.php';
 
 /* That's all, stop editing! Happy blogging. */
 

@@ -1,0 +1,33 @@
+{
+  "name": "cloud-gov/cf-ex-wordpress",
+  "description": "A sample Wordpress site readily deployable to cloud.gov",
+  "type": "project",
+  "license": "GPL-2.0+",
+  "repositories":[
+    {
+      "type": "composer",
+      "url": "https://wpackagist.org"
+    }
+  ],
+  "require": {
+    "johnpbloch/wordpress": "*",
+    "humanmade/s3-uploads": "^3.0",
+    "wpackagist-plugin/akismet": "^5.2",
+    "wpackagist-theme/create": "^2.9",
+    "wp-cli/wp-cli": "^2.8",
+    "wp-cli/core-command": "^2.1"
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true,
+      "johnpbloch/wordpress-core-installer": true
+    }
+  },
+  "extra": {
+    "wordpress-install-dir": "wordpress",
+    "installer-paths": {
+      "wordpress/wp-content/plugins/{$name}/": ["type:wordpress-plugin"],
+      "wordpress/wp-content/themes/{$name}/": ["type:wordpress-theme"]
+    }
+  }
+}
