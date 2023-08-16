@@ -120,9 +120,6 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
     This demo uses the [Human Made S3 Uploads plugin](https://github.com/humanmade/S3-Uploads), which automatically uploads files from your WordPress install to S3 and rewrites the URLs for you. The app requires no configuration. The access keys, secret key, and bucket name are stored in the environment configuration and read by the plugin on start.
 
     ```shell
-    # for CF CLI v7
-    cf run-task mywordpress "wp s3-uploads verify --path='/home/vcap/app/htdocs/'"
-    # for CF CLI v8
     cf run-task mywordpress --command "wp s3-uploads verify --path='/home/vcap/app/htdocs/'"
     ```
 
@@ -175,9 +172,6 @@ As with WordPress Core, make sure to watch for and install updates for the plugi
 We recommend using Cloud Foundry's "tasks" to run `wp-cli` commands. To do this, make sure to specify the WordPress path relative to the `app` directory. Here's how you would run `wp core version` on your cloud.gov container:
 
 ```bash
-# for CF CLI v7
-cf run-task APP_NAME "wp core version --path='/home/vcap/app/htdocs/'"
-# for CF CLI v8
 cf run-task APP_NAME --command "wp core version --path='/home/vcap/app/htdocs/'"
 ```
 
