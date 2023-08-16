@@ -28,3 +28,9 @@ if ! wp core is-installed --path="$WEBROOT"; then
     --admin_email="$ACCOUNT_EMAIL" \
     --admin_password="$ACCOUNT_PASS"
 fi
+
+if ! wp plugin is-active s3-uploads --path="$WEBROOT"; then
+  echo "Activating S3 Uploads plugin"
+  wp plugin activate s3-uploads \
+    --path="$WEBROOT/"
+fi
