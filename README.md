@@ -10,6 +10,12 @@ This is an out-of-the-box implementation of WordPress. It's an example of how co
 
 ## Installation
 
+> **Please note:** If you are deploying from a Windows machine, you may encounter issues with [Windows changing the file line endings](https://support.nesi.org.nz/hc/en-gb/articles/218032857-Converting-from-Windows-style-to-UNIX-style-line-endings).
+>
+> To avoid this issue, [follow these instructions](https://support.nesi.org.nz/hc/en-gb/articles/218032857-Converting-from-Windows-style-to-UNIX-style-line-endings#how-to-convert) to convert the file line endings from Windows-style to UNIX-style.
+>
+> If you are having this issue, you will see errors like `/bin/bash^M: bad interpreter: No such file or directory` in your application logs.
+
 1. Clone this repo.
 
     ```bash
